@@ -98,7 +98,11 @@ function calcChampionshipResults(array $aryAllMatchs, array $teams) {
                $losses += 1;
             }
 
-            $balanceGoals = $pointsGoals - $match[$vTeam];
+            $pointsGoals += $match[$vTeam];
+
+            $hitsGoals += $match[$currentOponentTeam];
+
+            $balanceGoals += $pointsGoals - $match[$vTeam];
 
          }
       }
@@ -127,12 +131,28 @@ function calcChampionshipResults(array $aryAllMatchs, array $teams) {
    
 };
 
+function sortChampionshipRank(array $championshipResults) {
+
+   foreach ($championshipResults as $v) {
+   
+      // var_dump($v['Stats']);
+      var_dump($v);
+
+      // echo "\n------------------------\n";
+   }
+
+};
+
 $allGamesResults = generateAllBattlesResults($teams);
 
 // var_dump($allGamesResults);
 
-$allTResults = calcChampionshipResults($allGamesResults, $teams);
+$championshipResults = calcChampionshipResults($allGamesResults, $teams);
 
-var_dump($allTResults);
+// var_dump($championshipResults);
+
+$championshipRank = sortChampionshipRank($championshipResults, $teams);
+
+// var_dump($championshipRank);
 
 ?>

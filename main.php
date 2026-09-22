@@ -133,15 +133,139 @@ function calcChampionshipResults(array $aryAllMatchs, array $teams) {
 
 function sortChampionshipRank(array $championshipResults) {
 
-   foreach ($championshipResults as $v) {
-   
-      // var_dump($v['Stats']);
-      var_dump($v);
+   $championshipListSorted = $championshipResults['Teams'];
 
-      // echo "\n------------------------\n";
-   }
+   // Persistindo o empate, ordem alfabética do time
+   usort($championshipListSorted, function ($tA, $tB) {
+      $teamA = array_key_first($tA);
+      $teamB = array_key_first($tB);
+
+      return strcoll($teamA, $teamB);
+   });
+
+   // Em caso de empate, maior número de gols marcados
+   usort($championshipListSorted, function ($tA, $tB) {
+
+      $statsTeamA = reset($tA)['Stats'];
+      $statsTeamB = reset($tB)['Stats'];
+
+      return $statsTeamB['pointsGoals'] <=> $statsTeamA['pointsGoals'];
+   });
+
+   // Em caso de empate, maior saldo de gols
+   usort($championshipListSorted, function ($tA, $tB) {
+
+      $statsTeamA = reset($tA)['Stats'];
+      $statsTeamB = reset($tB)['Stats'];
+
+      return $statsTeamB['balanceGoals'] <=> $statsTeamA['balanceGoals'];
+   });
+
+   // Maior número de pontos
+   usort($championshipListSorted, function ($tA, $tB) {
+
+      $statsTeamA = reset($tA)['Stats'];
+      $statsTeamB = reset($tB)['Stats'];
+
+      return $statsTeamB['pointsChampionship'] <=> $statsTeamA['pointsChampionship'];
+   });
+
+   return $championshipListSorted;
 
 };
+
+function showChampionshipRank(array $championshipRank) {
+
+   foreach ($championshipRank as $k => $v) {
+
+      $championshipPosition = $k + 1;
+   
+      echo "\n\n";
+
+      $currentTeamName = array_key_first($v);
+
+      echo "$championshipPosition. $currentTeamName \n";
+
+      echo "Pontos: ";
+      echo $v[$currentTeamName]['Stats']['pointsChampionship']; 
+      echo "\n";
+
+      echo "Saldo: ";
+      echo $v[$currentTeamName]['Stats']['balanceGoals']; 
+      echo "\n";
+
+      echo "Gols marcados: ";
+      echo $v[$currentTeamName]['Stats']['pointsGoals'];
+      echo "\n";
+
+      echo "Vitórias: ";
+      echo $v[$currentTeamName]['Stats']['wins']; 
+      echo "\n";
+
+      echo "Derrotas: ";
+      echo $v[$currentTeamName]['Stats']['losses']; 
+      echo "\n";
+
+      echo "Gols sofridos: ";
+      echo $v[$currentTeamName]['Stats']['hitsGoals'];
+      echo "\n";
+
+      echo "Jogos: ";
+      echo $v[$currentTeamName]['Stats']['games'];
+      echo "\n";
+
+   }
+
+}
+
+function showTeamRank(string $teamName, array $championshipRank) {
+
+   foreach ($championshipRank as $k => $v) {
+      
+      $currentTeamName = array_key_first($v);
+      $championshipPosition = $k + 1;
+
+      if ($currentTeamName === $teamName) {
+      
+         echo "\n";
+   
+         echo "$championshipPosition. $currentTeamName \n";
+   
+         echo "Pontos: ";
+         echo $v[$currentTeamName]['Stats']['pointsChampionship']; 
+         echo "\n";
+   
+         echo "Saldo: ";
+         echo $v[$currentTeamName]['Stats']['balanceGoals']; 
+         echo "\n";
+   
+         echo "Gols marcados: ";
+         echo $v[$currentTeamName]['Stats']['pointsGoals'];
+         echo "\n";
+   
+         echo "Vitórias: ";
+         echo $v[$currentTeamName]['Stats']['wins']; 
+         echo "\n";
+   
+         echo "Derrotas: ";
+         echo $v[$currentTeamName]['Stats']['losses']; 
+         echo "\n";
+   
+         echo "Gols sofridos: ";
+         echo $v[$currentTeamName]['Stats']['hitsGoals'];
+         echo "\n";
+   
+         echo "Jogos: ";
+         echo $v[$currentTeamName]['Stats']['games'];
+         echo "\n";
+
+         break;
+
+      }
+
+   }
+
+}
 
 $allGamesResults = generateAllBattlesResults($teams);
 
@@ -151,8 +275,23 @@ $championshipResults = calcChampionshipResults($allGamesResults, $teams);
 
 // var_dump($championshipResults);
 
-$championshipRank = sortChampionshipRank($championshipResults, $teams);
+$championshipRank = sortChampionshipRank($championshipResults);
 
 // var_dump($championshipRank);
+
+showChampionshipRank($championshipRank);
+
+while (true) {
+
+   $teamName = readline("\nBusque por um time: ");
+
+   if(!in_array($teamName, $teams)) {
+      echo "Esse time não existe ou não esta no campeonato, digite o nome de um time. \n---\n";
+      continue;
+   };
+
+   showTeamRank($teamName, $championshipRank);
+
+}
 
 ?>

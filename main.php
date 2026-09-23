@@ -1,12 +1,10 @@
 <?php
 
-// error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
-
 $teams = [
    'Flamengo',
    'Corinthians',
    'Palmeiras',
-   'São Paulo',
+   'Grêmio',
    'Fluminense',
    'Botafogo',
    'Santos',
@@ -15,13 +13,36 @@ $teams = [
    'Fortaleza'
 ];
 
-function generateAllBattlesResults(array $aryTeams) {
+function findTeamFromInput(string $teamName, array $teams): Bool {
+
+   $teamsList = array_map(
+      function($team) {
+         return mb_strtoupper($team, 'UTF-8');
+      },
+      $teams
+   );
+
+   return in_array(strtoupper($teamName), $teamsList);
+
+}
+
+function showChampionshipTeams(array $teams) {
+
+   foreach ($teams as $k => $v) {
+      
+      echo "- $v\n";
+
+   }
+
+}
+
+function generateAllBattlesResults(array $teams) {
    
    $allBattlesResults = [];
    
-   foreach ($aryTeams as $kTeam => $vTeam) {
+   foreach ($teams as $kTeam => $vTeam) {
 
-      $getAllTeamsWithoutCurrent = $aryTeams;
+      $getAllTeamsWithoutCurrent = $teams;
       array_splice($getAllTeamsWithoutCurrent, $kTeam, $kTeam);
       
       foreach ($getAllTeamsWithoutCurrent as $k => $v) {
@@ -45,7 +66,7 @@ function generateAllBattlesResults(array $aryTeams) {
 
 }
 
-function calcChampionshipResults(array $aryAllMatchs, array $teams) {
+function calcChampionshipResults(array $allBattlesResults, array $teams) {
 
    $allTeamsResults = [];
 
@@ -60,10 +81,8 @@ function calcChampionshipResults(array $aryAllMatchs, array $teams) {
       $balanceGoals = 0;
       $pointsChampionship = 0;
 
-      // var_dump($aryAllMatchs);
-
       $gamesTeam = array_filter(
-         $aryAllMatchs,
+         $allBattlesResults,
          function($match) use ($vTeam) {
             if (in_array($vTeam, array_values(array_keys($match)))) {
                return $match;
@@ -71,10 +90,7 @@ function calcChampionshipResults(array $aryAllMatchs, array $teams) {
          }
       );
 
-      // var_dump($gamesTeam);
-
       foreach ($gamesTeam as $k => $match) {
-         // var_dump($match);
 
          $currentOponentTeam = "";
 
@@ -105,6 +121,7 @@ function calcChampionshipResults(array $aryAllMatchs, array $teams) {
             $balanceGoals += $pointsGoals - $match[$vTeam];
 
          }
+
       }
       
       $allTeamsResults['Teams'][] = array(
@@ -225,7 +242,7 @@ function showTeamRank(string $teamName, array $championshipRank) {
       $currentTeamName = array_key_first($v);
       $championshipPosition = $k + 1;
 
-      if ($currentTeamName === $teamName) {
+      if (strtoupper($currentTeamName) === strtoupper($teamName)) {
       
          echo "\n";
    
@@ -267,26 +284,44 @@ function showTeamRank(string $teamName, array $championshipRank) {
 
 }
 
-$allGamesResults = generateAllBattlesResults($teams);
-
+$allBattlesResults = generateAllBattlesResults($teams);
 // var_dump($allGamesResults);
 
-$championshipResults = calcChampionshipResults($allGamesResults, $teams);
-
+$championshipResults = calcChampionshipResults($allBattlesResults, $teams);
 // var_dump($championshipResults);
 
 $championshipRank = sortChampionshipRank($championshipResults);
-
 // var_dump($championshipRank);
+
+// -------------------------------------------------- //
 
 showChampionshipRank($championshipRank);
 
 while (true) {
 
-   $teamName = readline("\nBusque por um time: ");
+   echo "\n";
 
-   if(!in_array($teamName, $teams)) {
-      echo "Esse time não existe ou não esta no campeonato, digite o nome de um time. \n---\n";
+   echo 'Digite "1" para ver o rank do campeonato | Digite "2" para ver os times existentes';
+
+   echo "\n";
+
+   $teamName = readline("Busque por um time: ");
+
+   if ($teamName === '1') {
+      echo "\n";
+      showChampionshipRank($championshipRank);
+      continue;
+   }
+
+   if ($teamName === '2') {
+      echo "\n";
+      showChampionshipTeams($teams);
+      continue;
+   }
+   
+   if(!findTeamFromInput($teamName, $teams)) {
+      echo "\n";
+      echo "Esse time não existe ou não esta no campeonato, digite o nome de um time. \n\n---\n";
       continue;
    };
 
